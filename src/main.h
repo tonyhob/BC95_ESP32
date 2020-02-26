@@ -97,8 +97,8 @@ void flightmodeoff()
 void sendpackage()
 {
     // flightmodeoff();
-    String cont = packagebuilder(String(counter()) + ",dBm:-" + String(getdBm()));
-    String msg = "AT+NSOST=1," + UDP_IP + "," + UDP_port + "," + String(cont.length()/2) + "," + cont;
+    String content = packagebuilder(String(counter()) + ",dBm:-" + String(getdBm()));
+    String msg = "AT+NSOST=1," + UDP_IP + "," + UDP_port + "," + String(content.length()/2) + "," + cont;
     Serial.println(msg);
     bc95write(msg);
     getresponse();
