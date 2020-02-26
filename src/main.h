@@ -35,7 +35,7 @@ String getresponse()
     return response;
 }
 
-void reset()
+void bc95_reset()
 {
     Serial.println("Setting up...(7s)");
     delay(200);
