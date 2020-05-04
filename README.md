@@ -1,10 +1,7 @@
 # BC95_ESP32
+NB-IoT Signal Strength Tester
 A BC95 chip on NB101 module with ESP32.
 
-
-
-ESP32 Rx 16
-      Tx 17
 
 NB101 Doc
 http://doc.iotxx.com/NB101
