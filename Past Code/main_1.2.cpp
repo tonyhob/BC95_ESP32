@@ -10,7 +10,7 @@
 // #include "esp_sleep.h"
 // #include "driver/adc.h"
 
-int sendinterval = 4500;
+int sendinterval = 3000;
 
 //OLED pins
 #define OLED_SDA 4
@@ -18,6 +18,7 @@ int sendinterval = 4500;
 #define OLED_RST 16
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
+
 
 
 int code;
@@ -53,7 +54,7 @@ void oledsetup()
     display.setTextColor(WHITE);
     display.setTextSize(1);
     display.setCursor(0, 0);
-    display.print("NB-IoT Tester01: " + String(code));
+    display.print("NB-IoT Tester: " + String(code));
     display.drawLine(0, 10, display.width() - 1, 10, WHITE);
     display.setCursor(0, 15);
     display.print("Connecting...in 10s");
@@ -65,7 +66,7 @@ void displaycon(int tempcount, int tempdbm, int tempdbm_mean)
     display.clearDisplay();
     display.setTextSize(1);
     display.setCursor(0, 0);
-    display.print("NB-IoT Tester01: " + String(code));
+    display.print("NB-IoT Tester: " + String(code));
     display.drawLine(0, 10, display.width() - 1, 10, WHITE);
     display.setCursor(0, 15);
     display.print("Packet  dBm   Mean");
@@ -127,7 +128,7 @@ void bc95_reset()
     tem = getresponse();
     bc95write("AT+NSOCR=DGRAM,17,3000,1");
     tem = getresponse();
-    delay(3000);
+    delay(1000);
 }
 
 int counter()
@@ -175,7 +176,7 @@ void gosleep(){
     display.setTextColor(WHITE);
     display.setTextSize(1);
     display.setCursor(0, 0);
-    display.print("NB-IoT Tester01: " + String(code));
+    display.print("NB-IoT Tester: " + String(code));
     display.drawLine(0, 10, display.width() - 1, 10, WHITE);
     display.setCursor(0, 15);
     display.print("Enough Data");
@@ -193,7 +194,7 @@ void sendpackage()
     dbm_mean = dbm_sum / count;
     displaycon(count, dbm, dbm_mean);
     // flightmodeoff();
-    String content = packagebuilder("\"{\"code\":" + String(code) + ",\"counter\":" + String(count) + ",\"dBm\":-" + String(dbm)+",\"dBmMean\":-" + String(dbm_mean)+"}\"");
+    String content = packagebuilder("\"{\"code\":" + String(code) + ",\"counter\":" + String(count) + ",\"dBm\":-" + String(dbm)+"}\"");
     String msg = "AT+NSOST=1," + UDP_IP + "," + UDP_port + "," + String(content.length() / 2) + "," + content;
     // Serial.println(msg);   //serial
     bc95write(msg);

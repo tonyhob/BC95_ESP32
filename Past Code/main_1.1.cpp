@@ -1,16 +1,13 @@
 //NB-IoT tester
-//done OLED
+//done OLED 
 
 #include <Arduino.h>
 #include <Wire.h>
-#include <ArduinoJson.h>
 
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 // #include "esp_sleep.h"
 // #include "driver/adc.h"
-
-int sendinterval = 4500;
 
 //OLED pins
 #define OLED_SDA 4
@@ -18,7 +15,6 @@ int sendinterval = 4500;
 #define OLED_RST 16
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
-
 
 int code;
 int count = 0;
@@ -28,6 +24,9 @@ int dbm_mean;
 // #define uS_TO_S_FACTOR 1000000 /* Conversion factor for micro seconds to seconds */
 // #define TIME_TO_SLEEP 20       /* Time ESP32 will go to sleep (in seconds) */
 // RTC_DATA_ATTR int bootCount = 0;
+
+// #define RXD2 16
+// #define TXD2 17
 
 String UDP_IP = "147.8.183.95";
 String UDP_port = "6001";
@@ -53,7 +52,7 @@ void oledsetup()
     display.setTextColor(WHITE);
     display.setTextSize(1);
     display.setCursor(0, 0);
-    display.print("NB-IoT Tester01: " + String(code));
+    display.print("NB-IoT Tester: " + String(code));
     display.drawLine(0, 10, display.width() - 1, 10, WHITE);
     display.setCursor(0, 15);
     display.print("Connecting...in 10s");
@@ -65,7 +64,7 @@ void displaycon(int tempcount, int tempdbm, int tempdbm_mean)
     display.clearDisplay();
     display.setTextSize(1);
     display.setCursor(0, 0);
-    display.print("NB-IoT Tester01: " + String(code));
+    display.print("NB-IoT Tester: " + String(code));
     display.drawLine(0, 10, display.width() - 1, 10, WHITE);
     display.setCursor(0, 15);
     display.print("Packet  dBm   Mean");
@@ -75,7 +74,7 @@ void displaycon(int tempcount, int tempdbm, int tempdbm_mean)
     display.drawLine(0, 52, display.width() - 1, 52, WHITE);
     display.setTextSize(1);
     display.setCursor(0, 54);
-    display.print("Ref: Gd:-51 Bd:-113;");
+    display.print("Ref: Gd:-51 Bd:-113;");  
     display.display();
 }
 
@@ -127,7 +126,7 @@ void bc95_reset()
     tem = getresponse();
     bc95write("AT+NSOCR=DGRAM,17,3000,1");
     tem = getresponse();
-    delay(3000);
+    delay(2000);
 }
 
 int counter()
@@ -145,20 +144,20 @@ int getdBm()
     return dBm;
 }
 
-// void flightmodeon()
-// {
-//     bc95write("AT+CFUN=0");
-//     delay(500);
-//     getresponse();
-// }
+void flightmodeon()
+{
+    bc95write("AT+CFUN=0");
+    delay(500);
+    getresponse();
+}
 
-// void flightmodeoff()
-// {
-//     bc95write("AT+CFUN=1");
-//     // Serial.println("waking");    //serial
-//     delay(5000);
-//     getresponse();
-// }
+void flightmodeoff()
+{
+    bc95write("AT+CFUN=1");
+    // Serial.println("waking");    //serial
+    delay(5000);
+    getresponse();
+}
 
 String packagebuilder(String temp)
 {
@@ -170,21 +169,6 @@ String packagebuilder(String temp)
     return package;
 }
 
-void gosleep(){
-    display.clearDisplay();
-    display.setTextColor(WHITE);
-    display.setTextSize(1);
-    display.setCursor(0, 0);
-    display.print("NB-IoT Tester01: " + String(code));
-    display.drawLine(0, 10, display.width() - 1, 10, WHITE);
-    display.setCursor(0, 15);
-    display.print("Enough Data");
-    display.print("Going to Sleep");
-    display.display();
-    delay(5000);
-    esp_deep_sleep_start();
-}
-
 void sendpackage()
 {
     int dbm = getdBm();
@@ -193,14 +177,11 @@ void sendpackage()
     dbm_mean = dbm_sum / count;
     displaycon(count, dbm, dbm_mean);
     // flightmodeoff();
-    String content = packagebuilder("\"{\"code\":" + String(code) + ",\"counter\":" + String(count) + ",\"dBm\":-" + String(dbm)+",\"dBmMean\":-" + String(dbm_mean)+"}\"");
+    String content = packagebuilder(String(code) + " - packet:" + String(count) + ", dBm:-" + String(dbm));
     String msg = "AT+NSOST=1," + UDP_IP + "," + UDP_port + "," + String(content.length() / 2) + "," + content;
     // Serial.println(msg);   //serial
     bc95write(msg);
     getresponse();
-    if (count == 50){
-        gosleep();
-    }
     // flightmodeon();
 }
 
@@ -214,6 +195,6 @@ void setup()
 
 void loop()
 {
+    delay(10000);
     sendpackage();
-    delay(sendinterval);
 }
